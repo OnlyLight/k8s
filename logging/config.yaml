@@ -14,6 +14,7 @@ data:
       # - debug
       # - trace
       # Default 'info' is set, that means it includes 'error' and 'warning'.
+      Flush 5
       log_level info
 
       # Parsers File
@@ -44,11 +45,12 @@ data:
       Match  kube.*
       Name stdout
 
-    # https://docs.fluentbit.io/manual/pipeline/outputs/elasticsearch
-    [OUTPUT]
-      Name es
-      Match nginx
-      Host  elasticsearch
-      Port  9200
-      Index nginx-log
-      Suppress_Type_Name On
+    # # https://docs.fluentbit.io/manual/pipeline/outputs/elasticsearch
+    # [OUTPUT]
+    #   Name es
+    #   Match nginx
+    #   Host  elasticsearch
+    #   Port  9200
+    #   Index nginx-log
+    #   Suppress_Type_Name On
+    #   Retry_Limit False

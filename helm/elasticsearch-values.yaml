@@ -1,0 +1,38 @@
+# helm repo add elastic https://helm.elastic.co
+# helm -n logging install -f elasticsearch-values.yaml elasticsearch elastic/elasticsearch
+# helm -n logging upgrade -f elasticsearch-values.yaml elasticsearch elastic/elasticsearch
+# kubectl get secrets --namespace=logging elasticsearch-master-credentials -ojsonpath='{.data.password}' | base64 -d
+
+clusterName: "docker-desktop-cluster"
+nodeGroup: "master"
+
+image: "docker.elastic.co/elasticsearch/elasticsearch"
+imageTag: "8.12.0"
+
+minimumMasterNodes: 1
+clusterHealthCheckParams: "wait_for_status=yellow&timeout=10s"
+
+readinessProbe:
+  initialDelaySeconds: 120
+  timeoutSeconds: 30
+  periodSeconds: 10
+  failureThreshold: 10
+
+antiAffinity: "soft"
+
+esJavaOpts: "-Xms512m -Xmx512m"
+
+resources:
+  requests:
+    cpu: "100m"
+    memory: "512Mi"
+  limits:
+    cpu: "1000m"
+    memory: "1Gi"
+
+volumeClaimTemplate:
+  accessModes: ["ReadWriteOnce"]
+  storageClassName: "hostpath"
+  resources:
+    requests:
+      storage: 10Gi

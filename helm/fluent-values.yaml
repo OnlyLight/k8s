@@ -1,0 +1,76 @@
+# helm repo add fluent https://fluent.github.io/helm-charts
+# helm -n logging install -f fluent-values.yaml fluent-bit fluent/fluent-bit
+# helm -n logging upgrade -f fluent-values.yaml fluent-bit fluent/fluent-bit
+
+image:
+  repository: cr.fluentbit.io/fluent/fluent-bit
+  tag: 3.0.3
+
+flush: 5
+logLevel: info
+metricsPort: 2020
+
+config:
+  service: |
+    [SERVICE]
+        Daemon Off
+        Flush {{ .Values.flush }}
+        Log_Level {{ .Values.logLevel }}
+        Parsers_File /fluent-bit/etc/parsers.conf
+        Parsers_File /fluent-bit/etc/conf/custom_parsers.conf
+        HTTP_Server On
+        HTTP_Listen 0.0.0.0
+        HTTP_Port {{ .Values.metricsPort }}
+        Health_Check On
+
+  inputs: |
+    [INPUT]
+        Name tail
+        Tag kube.*
+        Path /var/log/containers/*.log
+        multiline.parser docker, cri
+        Mem_Buf_Limit 5MB
+        Skip_Long_Lines On
+
+  filters: |
+    [FILTER]
+        Name kubernetes
+        Match kube.*
+        Merge_Log On
+        Keep_Log Off
+        K8S-Logging.Parser On
+        K8S-Logging.Exclude On
+
+    [FILTER]
+        Name grep
+        Match kube.*
+        Exclude $kubernetes['namespace_name'] logging
+
+  outputs: |
+    [Output]
+        Match kube.*
+        Name stdout
+
+    [Output]
+        Name es
+        Match kube.*
+        Host  docker-desktop-cluster-master-headless.logging.svc.cluster.local
+        Port  9200
+        Index nginx-log
+        Suppress_Type_Name On
+        Retry_Limit False
+        HTTP_User elastic
+        HTTP_Passwd D8ZX8Btb54MvKHMa
+        tls          On
+        tls.verify   Off
+        tls.ca_file  /fluent-bit/etc/certs/ca.crt
+
+extraVolumeMounts:
+  - name: certs
+    mountPath: /fluent-bit/etc/certs
+    readOnly: true
+
+extraVolumes:
+  - name: certs
+    secret:
+      secretName: docker-desktop-cluster-master-certs
