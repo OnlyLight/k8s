@@ -1,4 +1,6 @@
 # helm -n logging install -f kibana-values.yaml kibana elastic/kibana
+# kubectl get secrets --namespace=logging docker-desktop-cluster-master-credentials -ojsonpath='{.data.password}' | base64 -d
+# kubectl delete -n logging po,deploy,job,configmap,secret,svc,serviceaccount,role,rolebinding --selector app=kibana
 
 elasticsearchHosts: "https://docker-desktop-cluster-master:9200"
 elasticsearchCertificateSecret: docker-desktop-cluster-master-certs
