@@ -3,6 +3,7 @@ kind: Service
 metadata:
   name: elasticsearch-headless
 spec:
+  serviceAccountName: logging-sa
   clusterIP: None
   ports:
   - port: 9200
@@ -15,6 +16,7 @@ kind: StatefulSet
 metadata:
   name: elasticsearch
 spec:
+  serviceAccountName: logging-sa
   serviceName: elasticsearch-headless
   replicas: 1
   selector:

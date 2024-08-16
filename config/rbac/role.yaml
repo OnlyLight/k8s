@@ -1,0 +1,11 @@
+# kubectl create serviceaccount logging-sa -n logging
+
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: logging-restricted-role
+  namespace: logging
+rules:
+- apiGroups: [""]
+  resources: ["pods", "services", "deployments"]
+  verbs: ["get", "list", "watch", "create", "update", "delete"]
